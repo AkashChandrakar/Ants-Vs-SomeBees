@@ -22,8 +22,8 @@ class Place(object):
         """
         self.name = name
         self.exit = exit
-        self.bees = []        # A list of Bees
-        self.ant = None       # An Ant
+        self.bees = []  # A list of Bees
+        self.ant = None  # An Ant
         self.entrance = None  # A Place
         # Phase 1: Add an entrance to the exit
         "*** YOUR CODE HERE ***"
@@ -139,6 +139,7 @@ class Ant(Insect):
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
         Insect.__init__(self, armor)
+        self.food_cost = 0
 
     def is_ant(self):
         return True
@@ -149,13 +150,15 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester' 
     implemented = True
-
+    def __init__(self, armor=1):
+        Ant.__init__(self, armor)
+        self.food_cost = 2
     def action(self, colony):
         """Produce 1 additional food for the colony.
-        
         colony -- The AntColony, used to access game state information.
         """
         "*** YOUR CODE HERE ***"
+        colony.food = colony.food + 1
 
 def random_or_none(l):
     """Return a random element of list l, or return None if l is empty."""
@@ -168,6 +171,10 @@ class ThrowerAnt(Ant):
     name = 'Thrower'
     implemented = True
     damage = 1
+
+    def __init__(self, armor=1):
+        Ant.__init__(self, armor)
+        self.food_cost = 4
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
@@ -257,12 +264,12 @@ class AntColony(object):
     def simulate(self):
         """Simulate an attack on the ant colony (i.e., play the game)."""
         while len(self.queen.bees) == 0 and len(self.bees) > 0:
-            self.hive.strategy(self)    # Bees invade
-            self.strategy(self)         # Ants deploy
-            for ant in self.ants:       # Ants take actions
+            self.hive.strategy(self)  # Bees invade
+            self.strategy(self)  # Ants deploy
+            for ant in self.ants:  # Ants take actions
                 if ant.armor > 0:
                     ant.action(self)
-            for bee in self.bees:       # Bees take actions
+            for bee in self.bees:  # Bees take actions
                 if bee.armor > 0:
                     bee.action(self)
             self.time += 1
