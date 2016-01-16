@@ -27,7 +27,8 @@ class Place(object):
         self.entrance = None  # A Place
         # Phase 1: Add an entrance to the exit
         "*** YOUR CODE HERE ***"
-
+        if self.exit != None:
+            self.entrance = self.exit
     def add_insect(self, insect):
         """Add an Insect to this Place.
 
@@ -66,6 +67,7 @@ class Insect(object):
         """Create an Insect with an armor amount and a starting Place."""
         self.armor = armor
         self.place = place  # set by Place.add_insect and Place.remove_insect
+        self.watersafe=False # if set insect can be placed or can fly on water
 
 
     def reduce_armor(self, amount):
@@ -101,7 +103,11 @@ class Bee(Insect):
     """A Bee moves from place to place, following exits and stinging ants."""
     
     name = 'Bee'
-
+    '''constructor added '''
+    def __init__(self,armor=1):
+        Insect.__init__(self,armor)
+        self.watersafe=True
+    
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
         ant.reduce_armor(1)
@@ -150,8 +156,8 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester' 
     implemented = True
-    def __init__(self, armor=1):
-        Ant.__init__(self, armor)
+    def __init__(self, armor=1,place=None):
+        Ant.__init__(self, armor,place)
         self.food_cost = 2
     def action(self, colony):
         """Produce 1 additional food for the colony.
@@ -220,6 +226,9 @@ class Hive(Place):
         exits = [p for p in colony.places.values() if p.entrance is self]
         for bee in self.assault_plan.get(colony.time, []):
             bee.move_to(random.choice(exits))
+        
+    
+    
         
 
 class AntColony(object):
@@ -434,6 +443,10 @@ class Water(Place):
     def add_insect(self, insect):
         """Add insect if it is watersafe, otherwise reduce its armor to 0."""
         "*** YOUR CODE HERE ***"
+        if insect.watersafe==False:
+            insect.armor=0
+        else:
+            Place.add_insect(self, insect)
 
 
 class FireAnt(Ant):
@@ -441,11 +454,19 @@ class FireAnt(Ant):
 
     name = 'Fire'
     fire_damage = 3
+    implemented = True
     "*** YOUR CODE HERE ***"
-    implemented = False
+    def __init__(self,armor=1):
+        Ant.__init__(self, armor)
+        self.food_cost=4
 
     def reduce_armor(self, amount):
         "*** YOUR CODE HERE ***"
+        if self.armor<=0:
+            p = self.place
+            bees = p.bees
+            for i in range(len(bees)):
+                bees[i].armor-=fire_damage
 
 
 class LongThrower(ThrowerAnt):
